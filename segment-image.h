@@ -156,11 +156,6 @@ image<rgb> *segment_image(image<rgb> *im, float sigma, float c, int min_size,
   }
   */
 
-  /*
-  int xCord = 5;
-  int yCord = 5;
-  */
-
   int tmpComp = u->find(yCord * width + xCord);
 
   for (int y = 0; y < height; y++) {
@@ -170,8 +165,10 @@ image<rgb> *segment_image(image<rgb> *im, float sigma, float c, int min_size,
         {
             imRef(output, x, y) = colors[comp];
         }
-
-
+        else
+        {
+            imRef(output, x, y) = imRef(im, x, y);
+        }
     }
   }
 

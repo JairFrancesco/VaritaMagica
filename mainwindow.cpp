@@ -39,6 +39,7 @@ void MainWindow::establecerImagen(QImage imagen)
     this->sceneTo->imagen = imagen;
 }
 
+/*
 void MainWindow::segmentarImagen()
 {
     float sigma = 0.5;
@@ -61,3 +62,4 @@ void MainWindow::segmentarImagen()
     this->sceneTo->clear();
     this->sceneTo->addPixmap(pixmapTo);
 }
+*/

@@ -12,7 +12,7 @@ public:
 
     static image <rgb> * qImageToImage(QImage image);
     static QImage imageToQImage(image<rgb> * im);
-    static image<rgb> *segmentImage(image<rgb> *im, float sigma, float c, int min_size, int *num_ccs);
+    static image<rgb> *segmentImage(image<rgb> *im, float sigma, float c, int min_size, int *num_ccs, int xCoord, int yCoord);
 };
 
 #endif // UTILITY_H

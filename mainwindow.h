@@ -17,7 +17,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     void establecerImagen(QImage imagen);
     void mostrarImagen(QString filename);
-    void segmentarImagen();
+    //void segmentarImagen();
     ~MainWindow();
 
 private slots:

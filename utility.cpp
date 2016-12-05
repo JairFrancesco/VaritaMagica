@@ -35,7 +35,7 @@ QImage Utility::imageToQImage(image<rgb> * im) {
     return res;
 }
 
-image<rgb> *Utility::segmentImage(image<rgb> *im, float sigma, float c, int min_size, int *num_ccs) {
+image<rgb> *Utility::segmentImage(image<rgb> *im, float sigma, float c, int min_size, int *num_ccs, int xCoord, int yCoord) {
     //return im;//
-    return segment_image(im, sigma, c, min_size, num_ccs);
+    return segment_image(im, sigma, c, min_size, num_ccs, xCoord, yCoord);
 }

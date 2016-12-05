@@ -39,7 +39,7 @@ static inline float diff(image<float> *r, image<float> *g, image<float> *b,
  * num_ccs: number of connected components in the segmentation.
  */
 image<rgb> *segment_image(image<rgb> *im, float sigma, float c, int min_size,
-			  int *num_ccs) {
+              int *num_ccs, int xCord, int yCord) {
   int width = im->width();
   int height = im->height();
 
@@ -112,6 +112,7 @@ image<rgb> *segment_image(image<rgb> *im, float sigma, float c, int min_size,
   // segment
   universe *u = segment_graph(width*height, num, edges, c);
   
+  std::cout<<"NUM:"<<num<<std::endl;
   // post process small components
   if (min_size > 0) {
       for (int i = 0; i < num; i++) {
@@ -124,11 +125,15 @@ image<rgb> *segment_image(image<rgb> *im, float sigma, float c, int min_size,
   delete [] edges;
   *num_ccs = u->num_sets();
 
+  std::cout<<"NUM_SETS:"<<u->num_sets()<<std::endl;
+
   image<rgb> *output = new image<rgb>(width, height);
 
   //return output;
 
   std::cout<<"Ancho:"<<width<<"Altura"<<height<<std::endl;
+
+  std::cout<<"Width*height:"<<width*height<<std::endl;
   // pick random colors for each component
   rgb *colors = new rgb[width*height];
   for (int i = 0; i < width*height; i++)
@@ -151,12 +156,22 @@ image<rgb> *segment_image(image<rgb> *im, float sigma, float c, int min_size,
   }
   */
 
+  /*
+  int xCord = 5;
+  int yCord = 5;
+  */
+
+  int tmpComp = u->find(yCord * width + xCord);
 
   for (int y = 0; y < height; y++) {
     for (int x = 0; x < width; x++) {
+        int comp = u->find(y * width + x);
+        if (tmpComp == comp)
+        {
+            imRef(output, x, y) = colors[comp];
+        }
 
-      int comp = u->find(y * width + x);
-      imRef(output, x, y) = colors[comp];
+
     }
   }
 

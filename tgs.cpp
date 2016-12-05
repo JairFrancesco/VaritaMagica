@@ -71,12 +71,12 @@ void TGs::segmentarImagen()
 {
     float sigma = 0.5;
     float k = 200;
-    int min_size = 50;
+    int min_size = 100;
 
     Utility* ut = new Utility();
     image <rgb> *input = ut->qImageToImage(this->imagen);
     int num_ccs;
-    image<rgb> *seg = ut->segmentImage(input, sigma, k, min_size, &num_ccs);
+    image<rgb> *seg = ut->segmentImage(input, sigma, k, min_size, &num_ccs, this->X, this->Y);
 
     res = ut->imageToQImage(seg);
 

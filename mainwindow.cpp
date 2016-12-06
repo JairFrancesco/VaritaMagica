@@ -27,7 +27,6 @@ void MainWindow::on_btnOpen_clicked()
 
 void MainWindow::mostrarImagen(QString filename)
 {
-    //QPixmap pixmapTo = QPixmap::fromImage(res);
     QPixmap pixmapTo(filename);
     this->sceneTo->clear();
     this->sceneTo->addPixmap(pixmapTo);
@@ -38,28 +37,3 @@ void MainWindow::establecerImagen(QImage imagen)
     this->imagen = imagen;
     this->sceneTo->imagen = imagen;
 }
-
-/*
-void MainWindow::segmentarImagen()
-{
-    float sigma = 0.5;
-    float k = 200;
-    int min_size = 50;
-
-    Utility* ut = new Utility();
-    image <rgb> *input = ut->qImageToImage(this->imagen);
-    int num_ccs;
-    image<rgb> *seg = ut->segmentImage(input, sigma, k, min_size, &num_ccs);
-
-    res = ut->imageToQImage(seg);
-
-    //res = Utility::imageToQImage(input);
-
-    delete input;
-    delete seg;
-
-    QPixmap pixmapTo = QPixmap::fromImage(res);
-    this->sceneTo->clear();
-    this->sceneTo->addPixmap(pixmapTo);
-}
-*/

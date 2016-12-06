@@ -3,7 +3,6 @@
 
 #include <QMainWindow>
 #include "tgs.h"
-#include <utility.h>
 
 namespace Ui {
 class MainWindow;

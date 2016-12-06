@@ -23,16 +23,7 @@ HEADERS  += mainwindow.h \
     Grafo.h \
     Nodo.h \
     Arista.h \
-    segment-image.h \
-    disjoint-set.h \
-    segment-graph.h \
-    convolve.h \
-    utility.h \
-    pnmfile.h \
-    misc.h \
-    imutil.h \
-    imconv.h \
-    image.h \
-    filter.h
+    segmentacion.h \
+    paper.h
 
 FORMS    += mainwindow.ui

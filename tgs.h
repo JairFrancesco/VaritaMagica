@@ -24,13 +24,15 @@ public:
     QImage imagen;
     QImage res;
 
+private:
+    float valorSigma = 0.6;
+    float constanteK = 180;
+    int minSize = 100;
+
 public slots:
-    //void drawBackground(QPainter *painter, const QRectF &rect);
-    //void mouseMoveEvent(QGraphicsSceneMouseEvent * mouseEvent);
     void mousePressEvent(QGraphicsSceneMouseEvent *event);
     void segmentarImagen();
-    //void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
-
+    void mostrarImagenResultante(QImage res);
     bool over;
     QString str;
     //QGraphicsTextItem cursor;

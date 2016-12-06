@@ -40,12 +40,12 @@ inline bool operator<(const Arista &a, const Arista &b) {
 class Segmentacion
 {
     public:
-        universe *segmentarGrafo(int numVertices, int numAristas, Arista *aristas, float constanteTreshold) {
+        universe *segmentarGrafo(int numVertices, int numAristas, Arista *aristas, float constanteThreshold) {
           std::sort(aristas, aristas + numAristas); //Ordenar las aristas
           universe *u = new universe(numVertices);
           float *threshold = new float[numVertices];
           for (int i = 0; i < numVertices; i++)
-            threshold[i] = THRESHOLD(1,constanteTreshold);
+            threshold[i] = THRESHOLD(1,constanteThreshold);
           for (int i = 0; i < numAristas; i++) { //Para cada arista en orden no decreciente
             Arista * pArista = &aristas[i];
             // componentes conectados por esta arista
@@ -55,7 +55,7 @@ class Segmentacion
               if ((pArista->peso <= threshold[origen]) && (pArista->peso <= threshold[destino])) {
                     u->join(origen, destino);
                     origen = u->find(origen);
-                    threshold[origen] = pArista->peso + THRESHOLD(u->size(origen), constanteTreshold);
+                    threshold[origen] = pArista->peso + THRESHOLD(u->size(origen), constanteThreshold);
               }
             }
           }
@@ -63,20 +63,17 @@ class Segmentacion
           return u;
         }
 
-        image<rgb> *segmentarImagen(image<rgb> *im, float sigma, float c, int min_size, int xCord, int yCord) {
-          int width = im->width();
-          int height = im->height();
-
-          image<float> *r = new image<float>(width, height);
-          image<float> *g = new image<float>(width, height);
-          image<float> *b = new image<float>(width, height);
-
-          // smooth each color channel
-          for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-              imRef(r, x, y) = imRef(im, x, y).r;
-              imRef(g, x, y) = imRef(im, x, y).g;
-              imRef(b, x, y) = imRef(im, x, y).b;
+        image<rgb> *segmentarImagen(image<rgb> *imagen, float sigma, float constanteThreshold, int min_size, int xCord, int yCord) {
+          int ancho = imagen->width();
+          int altura = imagen->height();
+          image<float> *r = new image<float>(ancho, altura);
+          image<float> *g = new image<float>(ancho, altura);
+          image<float> *b = new image<float>(ancho, altura);
+          for (int y = 0; y < altura; y++) { //Suavizar cada canal de color
+            for (int x = 0; x < ancho; x++) {
+              imRef(r, x, y) = imRef(imagen, x, y).r;
+              imRef(g, x, y) = imRef(imagen, x, y).g;
+              imRef(b, x, y) = imRef(imagen, x, y).b;
             }
           }
           image<float> *smooth_r;
@@ -95,34 +92,34 @@ class Segmentacion
               smooth_b = b;
           }
 
-          Arista *aristas = new Arista[width*height*4]; // Construir grafo
+          Arista *aristas = new Arista[ancho*altura*4]; // Construir grafo
           int num = 0;
-          for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-              if (x < width-1) {
-                aristas[num].origen = y * width + x;
-                aristas[num].destino = y * width + (x+1);
+          for (int y = 0; y < altura; y++) {
+            for (int x = 0; x < ancho; x++) {
+              if (x < ancho-1) {
+                aristas[num].origen = y * ancho + x;
+                aristas[num].destino = y * ancho + (x+1);
                 aristas[num].peso = diff(smooth_r, smooth_g, smooth_b, x, y, x+1, y);
                 num++;
               }
 
-              if (y < height-1) {
-                aristas[num].origen = y * width + x;
-                aristas[num].destino = (y+1) * width + x;
+              if (y < altura-1) {
+                aristas[num].origen = y * ancho + x;
+                aristas[num].destino = (y+1) * ancho + x;
                 aristas[num].peso = diff(smooth_r, smooth_g, smooth_b, x, y, x, y+1);
                 num++;
               }
 
-              if ((x < width-1) && (y < height-1)) {
-                aristas[num].origen = y * width + x;
-                aristas[num].destino = (y+1) * width + (x+1);
+              if ((x < ancho-1) && (y < altura-1)) {
+                aristas[num].origen = y * ancho + x;
+                aristas[num].destino = (y+1) * ancho + (x+1);
                 aristas[num].peso = diff(smooth_r, smooth_g, smooth_b, x, y, x+1, y+1);
                 num++;
               }
 
-              if ((x < width-1) && (y > 0)) {
-                aristas[num].origen = y * width + x;
-                aristas[num].destino = (y-1) * width + (x+1);
+              if ((x < ancho-1) && (y > 0)) {
+                aristas[num].origen = y * ancho + x;
+                aristas[num].destino = (y-1) * ancho + (x+1);
                 aristas[num].peso = diff(smooth_r, smooth_g, smooth_b, x, y, x+1, y-1);
                 num++;
               }
@@ -132,7 +129,7 @@ class Segmentacion
           delete smooth_g;
           delete smooth_b;
 
-          universe *u = this->segmentarGrafo(width*height, num, aristas, c);
+          universe *u = this->segmentarGrafo(ancho*altura, num, aristas, constanteThreshold);
           if (min_size > 0) {
               for (int i = 0; i < num; i++) {
                 int a = u->find(aristas[i].origen);
@@ -143,29 +140,29 @@ class Segmentacion
           }
           delete [] aristas;
 
-          image<rgb> *output = new image<rgb>(width, height);
-          rgb *colors = new rgb[width*height];
-          for (int i = 0; i < width*height; i++)
+          image<rgb> *resultado = new image<rgb>(ancho, altura);
+          rgb *colors = new rgb[ancho*altura];
+          for (int i = 0; i < ancho*altura; i++)
               colors[i] = colorAleatorio(); //Elegir colores aleatorios para cada componente
-          int tmpComp = u->find(yCord * width + xCord);
+          int tmpComp = u->find(yCord * ancho + xCord);
 
-          for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                int comp = u->find(y * width + x);
+          for (int y = 0; y < altura; y++) {
+            for (int x = 0; x < ancho; x++) {
+                int comp = u->find(y * ancho + x);
                 if (tmpComp == comp)
                 {
-                    imRef(output, x, y) = colors[comp];
+                    imRef(resultado, x, y) = colors[comp];
                 }
                 else
                 {
-                    imRef(output, x, y) = imRef(im, x, y);
+                    imRef(resultado, x, y) = imRef(imagen, x, y);
                 }
             }
           }
 
           delete [] colors;
           delete u;
-          return output;
+          return resultado;
         }
 
 };

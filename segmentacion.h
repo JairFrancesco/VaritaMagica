@@ -13,12 +13,12 @@ static inline float diff(image<float> *r, image<float> *g, image<float> *b,
           square(imRef(b, x1, y1)-imRef(b, x2, y2)));
 }
 
-inline rgb random_rgb(){
+inline rgb colorAleatorio(){
   rgb c;
-
   c.r = (uchar)(255.0 * (rand() / (RAND_MAX + 1.0)));
   c.g = (uchar)(255.0 * (rand() / (RAND_MAX + 1.0)));
   c.b = (uchar)(255.0 * (rand() / (RAND_MAX + 1.0)));
+  return c;
 }
 
 // threshold function
@@ -143,12 +143,10 @@ class Segmentacion
           }
           delete [] aristas;
 
-          std::cout<<"NUM_SETS:"<<u->num_sets()<<std::endl;
-
           image<rgb> *output = new image<rgb>(width, height);
           rgb *colors = new rgb[width*height];
           for (int i = 0; i < width*height; i++)
-              colors[i] = random_rgb(); //Elegir colores aleatorios para cada componente
+              colors[i] = colorAleatorio(); //Elegir colores aleatorios para cada componente
           int tmpComp = u->find(yCord * width + xCord);
 
           for (int y = 0; y < height; y++) {

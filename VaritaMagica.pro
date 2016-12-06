@@ -14,8 +14,7 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    tgs.cpp \
-    utility.cpp
+    tgs.cpp
 
 HEADERS  += mainwindow.h \
     utilidades.h \

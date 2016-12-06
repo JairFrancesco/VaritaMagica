@@ -24,53 +24,44 @@ inline rgb random_rgb(){
 // threshold function
 #define THRESHOLD(size, c) (c/size)
 
-typedef struct {
-  float w;
-  int a, b;
-} edge;
+class Arista
+{
+    public:
+        float peso;
+        int origen, destino;
+};
 
-inline bool operator<(const edge &a, const edge &b) {
-  return a.w < b.w;
+
+inline bool operator<(const Arista &a, const Arista &b) {
+  return a.peso < b.peso;
 }
 
 
 class Segmentacion
 {
     public:
-        universe *segmentarGrafo(int num_vertices, int num_edges, edge *edges, float c) {
-          // sort edges by weight
-          std::sort(edges, edges + num_edges);
-
-          // make a disjoint-set forest
-          universe *u = new universe(num_vertices);
-
-          // init thresholds
-          float *threshold = new float[num_vertices];
-          for (int i = 0; i < num_vertices; i++)
-            threshold[i] = THRESHOLD(1,c);
-
-          // for each edge, in non-decreasing weight order...
-          for (int i = 0; i < num_edges; i++) {
-            edge *pedge = &edges[i];
-
-            // components conected by this edge
-            int a = u->find(pedge->a);
-            int b = u->find(pedge->b);
-            if (a != b) {
-              if ((pedge->w <= threshold[a]) &&
-              (pedge->w <= threshold[b])) {
-            u->join(a, b);
-            a = u->find(a);
-            threshold[a] = pedge->w + THRESHOLD(u->size(a), c);
+        universe *segmentarGrafo(int numVertices, int numAristas, Arista *aristas, float constanteTreshold) {
+          std::sort(aristas, aristas + numAristas); //Ordenar las aristas
+          universe *u = new universe(numVertices);
+          float *threshold = new float[numVertices];
+          for (int i = 0; i < numVertices; i++)
+            threshold[i] = THRESHOLD(1,constanteTreshold);
+          for (int i = 0; i < numAristas; i++) { //Para cada arista en orden no decreciente
+            Arista * pArista = &aristas[i];
+            // componentes conectados por esta arista
+            int origen = u->find(pArista->origen);
+            int destino = u->find(pArista->destino);
+            if (origen != destino) {
+              if ((pArista->peso <= threshold[origen]) && (pArista->peso <= threshold[destino])) {
+                    u->join(origen, destino);
+                    origen = u->find(origen);
+                    threshold[origen] = pArista->peso + THRESHOLD(u->size(origen), constanteTreshold);
               }
             }
           }
-
-          // free up
           delete threshold;
           return u;
         }
-
 
         image<rgb> *segmentarImagen(image<rgb> *im, float sigma, float c, int min_size, int xCord, int yCord) {
           int width = im->width();
@@ -104,37 +95,36 @@ class Segmentacion
               smooth_b = b;
           }
 
-          // build graph
-          edge *edges = new edge[width*height*4];
+          Arista *aristas = new Arista[width*height*4]; // Construir grafo
           int num = 0;
           for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
               if (x < width-1) {
-            edges[num].a = y * width + x;
-            edges[num].b = y * width + (x+1);
-            edges[num].w = diff(smooth_r, smooth_g, smooth_b, x, y, x+1, y);
-            num++;
+                aristas[num].origen = y * width + x;
+                aristas[num].destino = y * width + (x+1);
+                aristas[num].peso = diff(smooth_r, smooth_g, smooth_b, x, y, x+1, y);
+                num++;
               }
 
               if (y < height-1) {
-            edges[num].a = y * width + x;
-            edges[num].b = (y+1) * width + x;
-            edges[num].w = diff(smooth_r, smooth_g, smooth_b, x, y, x, y+1);
-            num++;
+                aristas[num].origen = y * width + x;
+                aristas[num].destino = (y+1) * width + x;
+                aristas[num].peso = diff(smooth_r, smooth_g, smooth_b, x, y, x, y+1);
+                num++;
               }
 
               if ((x < width-1) && (y < height-1)) {
-            edges[num].a = y * width + x;
-            edges[num].b = (y+1) * width + (x+1);
-            edges[num].w = diff(smooth_r, smooth_g, smooth_b, x, y, x+1, y+1);
-            num++;
+                aristas[num].origen = y * width + x;
+                aristas[num].destino = (y+1) * width + (x+1);
+                aristas[num].peso = diff(smooth_r, smooth_g, smooth_b, x, y, x+1, y+1);
+                num++;
               }
 
               if ((x < width-1) && (y > 0)) {
-            edges[num].a = y * width + x;
-            edges[num].b = (y-1) * width + (x+1);
-            edges[num].w = diff(smooth_r, smooth_g, smooth_b, x, y, x+1, y-1);
-            num++;
+                aristas[num].origen = y * width + x;
+                aristas[num].destino = (y-1) * width + (x+1);
+                aristas[num].peso = diff(smooth_r, smooth_g, smooth_b, x, y, x+1, y-1);
+                num++;
               }
             }
           }
@@ -142,34 +132,23 @@ class Segmentacion
           delete smooth_g;
           delete smooth_b;
 
-          // segment
-          universe *u = this->segmentarGrafo(width*height, num, edges, c);
-
-          std::cout<<"NUM:"<<num<<std::endl;
+          universe *u = this->segmentarGrafo(width*height, num, aristas, c);
           if (min_size > 0) {
               for (int i = 0; i < num; i++) {
-                int a = u->find(edges[i].a);
-                int b = u->find(edges[i].b);
+                int a = u->find(aristas[i].origen);
+                int b = u->find(aristas[i].destino);
                 if ((a != b) && ((u->size(a) < min_size) || (u->size(b) < min_size)))
                   u->join(a, b);
               }
           }
-          delete [] edges;
+          delete [] aristas;
 
           std::cout<<"NUM_SETS:"<<u->num_sets()<<std::endl;
 
           image<rgb> *output = new image<rgb>(width, height);
-
-          //return output;
-
-          std::cout<<"Ancho:"<<width<<"Altura"<<height<<std::endl;
-
-          std::cout<<"Width*height:"<<width*height<<std::endl;
-          // pick random colors for each component
           rgb *colors = new rgb[width*height];
           for (int i = 0; i < width*height; i++)
-              colors[i] = random_rgb();
-
+              colors[i] = random_rgb(); //Elegir colores aleatorios para cada componente
           int tmpComp = u->find(yCord * width + xCord);
 
           for (int y = 0; y < height; y++) {
@@ -188,7 +167,6 @@ class Segmentacion
 
           delete [] colors;
           delete u;
-
           return output;
         }
 
